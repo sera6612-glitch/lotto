@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로또 6/45 번호 추천기</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 520px;
+            padding: 28px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .lotto-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .lotto-set {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .set-label {
+            font-weight: 700;
+            color: #475569;
+            font-size: 14px;
+            width: 32px;
+        }
+
+        .balls-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ball {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #ffffff;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2), 1px 2px 4px rgba(0,0,0,0.15);
+            text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+        }
+
+        /* 로또 번호대별 공식 색상 범위 적용 */
+        .ball.range-1 { background-color: #fbc02d; color: #000; text-shadow: none; } /* 1~10: 노랑 */
+        .ball.range-2 { background-color: #29b6f6; } /* 11~20: 파랑 */
+        .ball.range-3 { background-color: #ef5350; } /* 21~30: 빨강 */
+        .ball.range-4 { background-color: #78909c; } /* 31~40: 회색 */
+        .ball.range-5 { background-color: #66bb6a; } /* 41~45: 초록 */
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-generate {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+
+        .btn-generate:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-copy {
+            background-color: #e2e8f0;
+            color: #334155;
+            flex: 0.4;
+        }
+
+        .btn-copy:hover {
+            background-color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎲 로또 번호 추천기</h1>
+        <p class="subtitle">버튼을 눌러 추천 번호 5세트를 생성하세요.</p>
+
+        <div id="lottoList" class="lotto-list"></div>
+
+        <div class="btn-group">
+            <button class="btn-generate" onclick="generateLottoNumbers()">번호 추첨하기</button>
+            <button class="btn-copy" onclick="copyNumbers()">복사</button>
+        </div>
+    </div>
+
+    <script>
+        // 1~45 중 중복 없이 6개 숫자를 뽑아 오름차순 정렬하는 함수
+        function getSingleLottoSet() {
+            const numbers = new Set();
+            while (numbers.size < 6) {
+                const randomNum = Math.floor(Math.random() * 45) + 1;
+                numbers.add(randomNum);
+            }
+            return Array.from(numbers).sort((a, b) => a - b);
+        }
+
+        // 번호 범위에 맞는 CSS 클래스 반환
+        function getRangeClass(number) {
+            if (number <= 10) return 'range-1';
+            if (number <= 20) return 'range-2';
+            if (number <= 30) return 'range-3';
+            if (number <= 40) return 'range-4';
+            return 'range-5';
+        }
+
+        // 5세트의 로또 번호를 생성하여 화면에 렌더링하는 함수
+        function generateLottoNumbers() {
+            const lottoListElement = document.getElementById('lottoList');
+            lottoListElement.innerHTML = '';
+
+            const labels = ['A', 'B', 'C', 'D', 'E'];
+
+            for (let i = 0; i < 5; i++) {
+                const numbers = getSingleLottoSet();
+                
+                const setDiv = document.createElement('div');
+                setDiv.className = 'lotto-set';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'set-label';
+                labelSpan.textContent = labels[i];
+
+                const ballsDiv = document.createElement('div');
+                ballsDiv.className = 'balls-container';
+
+                numbers.forEach(num => {
+                    const ballSpan = document.createElement('span');
+                    ballSpan.className = `ball ${getRangeClass(num)}`;
+                    ballSpan.textContent = num;
+                    ballsDiv.appendChild(ballSpan);
+                });
+
+                setDiv.appendChild(labelSpan);
+                setDiv.appendChild(ballsDiv);
+                lottoListElement.appendChild(setDiv);
+            }
+        }
+
+        // 현재 생성된 번호 텍스트 클립보드 복사 함수
+        function copyNumbers() {
+            const sets = document.querySelectorAll('.lotto-set');
+            if (sets.length === 0) return;
+
+            let resultText = '[로또 추천 번호]\n';
+            sets.forEach(set => {
+                const label = set.querySelector('.set-label').textContent;
+                const balls = Array.from(set.querySelectorAll('.ball')).map(b => b.textContent.padStart(2, '0'));
+                resultText += `${label} : ${balls.join(', ')}\n`;
+            });
+
+            navigator.clipboard.writeText(resultText).then(() => {
+                alert('추천 번호가 클립보드에 복사되었습니다!');
+            }).catch(() => {
+                alert('복사 중 오류가 발생했습니다.');
+            });
+        }
+
+        // 페이지 최초 로드 시 자동 생성 실행
+        window.onload = generateLottoNumbers;
+    </script>
+</body>
+</html>
